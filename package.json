@@ -1,0 +1,13 @@
+{
+  "name": "tauri-vite-proxy-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:plugin": "pnpm --filter tauri-plugin-browser-proxy-js build",
+    "dev:example": "pnpm --filter browser-proxy-example dev",
+    "tauri:example": "pnpm --filter browser-proxy-example tauri dev",
+    "test:e2e": "pnpm --filter browser-proxy-e2e test",
+    "clean": "rm -rf plugin/dist example/dist example/src-tauri/target tests/node_modules"
+  },
+  "packageManager": "pnpm@9.12.0"
+}

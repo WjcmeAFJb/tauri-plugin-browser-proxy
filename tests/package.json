@@ -1,0 +1,17 @@
+{
+  "name": "browser-proxy-e2e",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:shim": "playwright test --config playwright.shim.config.ts",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "demo": "node demo/run-demo.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "playwright": "^1.44.0"
+  }
+}

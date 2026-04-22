@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-relay-event"
+description = "Enables the relay_event command without any pre-configured scope."
+commands.allow = ["relay_event"]
+
+[[permission]]
+identifier = "deny-relay-event"
+description = "Denies the relay_event command without any pre-configured scope."
+commands.deny = ["relay_event"]

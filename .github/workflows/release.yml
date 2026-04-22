@@ -1,0 +1,145 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v0.1.0). Must already exist.'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=$TAG"         >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build npm tarball
+        run: bash scripts/pack-release.sh
+
+      - name: List artifacts
+        run: ls -la dist/*.tgz
+
+      - name: Write release notes
+        id: notes
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          NPM_URL="https://github.com/${REPO}/releases/download/${TAG}/tauri-plugin-browser-proxy-js-${VERSION}.tgz"
+
+          cat > release-notes.md <<EOF
+          # tauri-plugin-browser-proxy ${TAG}
+
+          Mirror a Tauri 2 webview to an ordinary browser tab over HTTP + SSE.
+          Develop with Chrome/Firefox DevTools while Tauri IPC keeps working.
+
+          Licensed under **LGPL-3.0-or-later** (see \`LICENSE\` in the repo).
+
+          ## Install
+
+          ### 1. Rust plugin — Cargo git dependency
+
+          \`\`\`toml
+          # src-tauri/Cargo.toml
+          [dependencies]
+          tauri-plugin-browser-proxy = { git = "https://github.com/${REPO}", tag = "${TAG}" }
+          \`\`\`
+
+          Cargo clones the repo, discovers the workspace, and picks the
+          \`tauri-plugin-browser-proxy\` crate automatically. Alternatives:
+
+          \`\`\`toml
+          # track a branch
+          tauri-plugin-browser-proxy = { git = "https://github.com/${REPO}", branch = "main" }
+
+          # pin a specific commit
+          tauri-plugin-browser-proxy = { git = "https://github.com/${REPO}", rev = "<sha>" }
+          \`\`\`
+
+          ### 2. JS package — install the tarball by URL
+
+          \`\`\`bash
+          pnpm add ${NPM_URL}
+          # or
+          npm  install ${NPM_URL}
+          # or
+          yarn add ${NPM_URL}
+          \`\`\`
+
+          \`releases/latest/download/…\` also works if you want the URL to
+          auto-follow the newest release.
+
+          ## Wire it up
+
+          \`\`\`rust
+          // src-tauri/src/lib.rs
+          pub fn run() {
+              tauri::Builder::default()
+                  .plugin(tauri_plugin_browser_proxy::init())
+                  .run(tauri::generate_context!())
+                  .unwrap();
+          }
+          \`\`\`
+
+          \`\`\`ts
+          // vite.config.ts
+          import { defineConfig } from 'vite';
+          import { browserProxy } from 'tauri-plugin-browser-proxy-js/vite';
+
+          export default defineConfig({
+            plugins: [browserProxy()],
+            server: { port: 5173, strictPort: true, host: '127.0.0.1' },
+          });
+          \`\`\`
+
+          \`\`\`json
+          // src-tauri/capabilities/default.json
+          { "permissions": ["core:default", "browser-proxy:default"] }
+          \`\`\`
+
+          Then \`pnpm tauri dev\` and open <http://localhost:5173> in any
+          browser. See the [README](https://github.com/${REPO}#readme) and
+          [\`docs/getting-started.md\`](https://github.com/${REPO}/blob/${TAG}/docs/getting-started.md)
+          for the full walkthrough.
+          EOF
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          gh release create "$TAG" \
+            --title "tauri-plugin-browser-proxy $TAG" \
+            --notes-file release-notes.md \
+            "dist/tauri-plugin-browser-proxy-js-${VERSION}.tgz"

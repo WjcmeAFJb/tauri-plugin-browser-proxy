@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-relay-event"
+description = "Allows the bridge webview to forward intercepted Tauri events to browser tabs."
+commands.allow = ["relay_event"]

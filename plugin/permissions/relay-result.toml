@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-relay-result"
+description = "Allows the bridge webview to relay an invoke result back to the HTTP server."
+commands.allow = ["relay_result"]

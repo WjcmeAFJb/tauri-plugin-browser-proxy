@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-register-bridge"
+description = "Allows calling register_bridge from the bridge webview."
+commands.allow = ["register_bridge"]

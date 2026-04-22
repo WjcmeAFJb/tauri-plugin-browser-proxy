@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-proxy-url"
+description = "Allows reading the proxy's public URL — used by the shim for status display."
+commands.allow = ["proxy_url"]

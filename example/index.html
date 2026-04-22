@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>browser-proxy example</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>tauri-plugin-browser-proxy — demo</h1>
+      <p class="status" data-testid="proxy-status">checking…</p>
+
+      <section>
+        <h2>1. Regular invoke</h2>
+        <button data-testid="btn-greet" id="btn-greet">greet('world')</button>
+        <pre data-testid="out-greet" id="out-greet"></pre>
+      </section>
+
+      <section>
+        <h2>2. Binary roundtrip (fs.readFile)</h2>
+        <input data-testid="in-path" id="in-path" value="/etc/hostname" />
+        <button data-testid="btn-read-bytes" id="btn-read-bytes">read bytes</button>
+        <pre data-testid="out-read-bytes" id="out-read-bytes"></pre>
+      </section>
+
+      <section>
+        <h2>3. Events (fs watcher) + live directory</h2>
+        <input data-testid="in-watch-path" id="in-watch-path" value="/tmp" />
+        <button data-testid="btn-watch" id="btn-watch">start watch</button>
+        <button data-testid="btn-unwatch" id="btn-unwatch" disabled>stop watch</button>
+        <div class="split">
+          <div>
+            <h3>directory (reads via fs.readDir)</h3>
+            <pre data-testid="out-tree" id="out-tree">— not watching —</pre>
+          </div>
+          <div>
+            <h3>watcher events (via Channel → SSE)</h3>
+            <pre data-testid="out-watch" id="out-watch"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>4. Notifications plugin</h2>
+        <button data-testid="btn-notify" id="btn-notify">send notification</button>
+        <pre data-testid="out-notify" id="out-notify"></pre>
+      </section>
+
+      <section>
+        <h2>5. Custom event emit → listen roundtrip</h2>
+        <button data-testid="btn-ping" id="btn-ping">emit 'ping', expect 'pong'</button>
+        <pre data-testid="out-ping" id="out-ping"></pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

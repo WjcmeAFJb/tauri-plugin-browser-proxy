@@ -1,0 +1,12 @@
+[default]
+description = """
+Grant the bridge webview access to the plugin's relay commands. Required for
+the browser-proxy to function. These commands are strictly local-loopback
+control plane — they never read or write user data directly.
+"""
+permissions = [
+  "allow-register-bridge",
+  "allow-relay-result",
+  "allow-relay-event",
+  "allow-proxy-url",
+]
